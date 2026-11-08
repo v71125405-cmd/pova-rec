@@ -1,3 +1,4 @@
+
 name: Build Pova Recorder APK
 
 on:
@@ -31,11 +32,21 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Configure Kotlin JVM target
+        run: |
+          cat > /tmp/kotlin-jvm.gradle <<'EOF'
+          allprojects {
+            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+              kotlinOptions.jvmTarget = "1.8"
+            }
+          }
+          EOF
+
       - name: Extract source
         run: unzip PovaRecorder_Checked_Source.zip -d .
 
       - name: Build APK
-        run: gradle -p pova assembleDebug
+        run: gradle -I /tmp/kotlin-jvm.gradle -p pova assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
