@@ -35,9 +35,15 @@ jobs:
       - name: Configure Kotlin JVM target
         run: |
           cat > /tmp/kotlin-jvm.gradle <<'EOF'
-          allprojects {
-            tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-              kotlinOptions.jvmTarget = "1.8"
+          gradle.projectsEvaluated {
+            rootProject.allprojects {
+              tasks.configureEach { task ->
+                if (task.name.toLowerCase().contains("kotlin")) {
+                  if (task.hasProperty("kotlinOptions")) {
+                    task.kotlinOptions.jvmTarget = "1.8"
+                  }
+                }
+              }
             }
           }
           EOF
